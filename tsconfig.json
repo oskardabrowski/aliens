@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "target": "ES5",
+    "sourceMap": true,
+    "allowJs": true,
+    "noImplicitAny": true,
+    "module": "ES6",
+    "typeRoots": ["src/images/"],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "lib": ["ESNext", "DOM"],
+    "jsx": "react",
+    "strict": true,
+    "moduleResolution": "node",
+    "baseUrl": "./src",
+    "strictNullChecks": false
+  },
+  "include": ["src/**/*"]
+}

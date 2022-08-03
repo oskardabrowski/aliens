@@ -6,7 +6,7 @@ export class CanvasView {
     constructor(canvasName:string) {
         this.canvas = document.querySelector(canvasName) as HTMLCanvasElement;
         this.context = this.canvas.getContext('2d');
-        this.start = document.querySelector('#start')
+        this.start = document.querySelector('#start');
     }
 
     clear() {
@@ -19,12 +19,13 @@ export class CanvasView {
     }
 
     drawShip(img: HTMLImageElement, Width: number, Height: number, X: number, Y:number) {
+        this.context.imageSmoothingEnabled = false;
         this.context.drawImage(
             img,
             X,
             Y,
-            Width,
-            Height
+            Width *1.5,
+            Height *1.5
         )
     }
 

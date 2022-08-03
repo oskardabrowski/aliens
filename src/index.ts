@@ -1,5 +1,5 @@
 import {CanvasView} from "./view/CanvasView";
-import SHIP_URL from './images/Ship.png';
+import SHIP_URL from './images/Ship.webp';
 
 const canvas:HTMLCanvasElement = document.querySelector('#PlayField');
 const ShipX:number = (canvas.width /2) - (15/2);
@@ -11,8 +11,8 @@ image.src = SHIP_URL;
 
 const ShipObj: {img: HTMLImageElement, width:number, height:number, X:number, Y:number} = {
     img: image,
-    width: 20,
-    height: 20,
+    width: 15,
+    height: 15,
     X: ShipX,
     Y: ShipY
 }

@@ -534,17 +534,17 @@ function hmrAcceptRun(bundle, id) {
 },{}],"h7u1C":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _canvasView = require("./view/CanvasView");
-var _shipPng = require("./images/Ship.png");
-var _shipPngDefault = parcelHelpers.interopDefault(_shipPng);
+var _shipWebp = require("./images/Ship.webp");
+var _shipWebpDefault = parcelHelpers.interopDefault(_shipWebp);
 const canvas = document.querySelector("#PlayField");
 const ShipX = canvas.width / 2 - 7.5;
 const ShipY = canvas.height / 2 - 7.5;
 const image = new Image();
-image.src = (0, _shipPngDefault.default);
+image.src = (0, _shipWebpDefault.default);
 const ShipObj = {
     img: image,
-    width: 20,
-    height: 20,
+    width: 15,
+    height: 15,
     X: ShipX,
     Y: ShipY
 };
@@ -566,7 +566,7 @@ document.addEventListener("keydown", (e)=>{
 const view = new (0, _canvasView.CanvasView)("#PlayField");
 view.initGame(startGame);
 
-},{"./view/CanvasView":"5noQJ","./images/Ship.png":"jAZYs","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"5noQJ":[function(require,module,exports) {
+},{"./view/CanvasView":"5noQJ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./images/Ship.webp":"fxpU1"}],"5noQJ":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "CanvasView", ()=>CanvasView);
@@ -584,7 +584,8 @@ class CanvasView {
         console.log("GameInitialized");
     }
     drawShip(img, Width, Height, X, Y) {
-        this.context.drawImage(img, X, Y, Width, Height);
+        this.context.imageSmoothingEnabled = false;
+        this.context.drawImage(img, X, Y, Width * 1.5, Height * 1.5);
     }
 }
 
@@ -618,8 +619,8 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}],"jAZYs":[function(require,module,exports) {
-module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "Ship.bc1e419a.png" + "?" + Date.now();
+},{}],"fxpU1":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "Ship.756280cf.webp" + "?" + Date.now();
 
 },{"./helpers/bundle-url":"lgJ39"}],"lgJ39":[function(require,module,exports) {
 "use strict";

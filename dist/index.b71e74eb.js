@@ -532,41 +532,24 @@ function hmrAcceptRun(bundle, id) {
 }
 
 },{}],"h7u1C":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _canvasView = require("./view/CanvasView");
-var _shipWebp = require("./images/Ship.webp");
-var _shipWebpDefault = parcelHelpers.interopDefault(_shipWebp);
-const canvas = document.querySelector("#PlayField");
-const ShipX = canvas.width / 2 - 7.5;
-const ShipY = canvas.height / 2 - 7.5;
-const image = new Image();
-image.src = (0, _shipWebpDefault.default);
-const ShipObj = {
-    img: image,
-    width: 15,
-    height: 15,
-    X: ShipX,
-    Y: ShipY
-};
-function gameLoop(view) {
+var _ship = require("./elements/Ship");
+var _setup = require("./setup");
+function gameLoop(view, ship) {
     view.clear();
-    view.drawShip(ShipObj.img, ShipObj.width, ShipObj.height, ShipObj.X, ShipObj.Y);
-    requestAnimationFrame(()=>gameLoop(view));
+    view.drawElement(ship);
+    if (ship.isMovingLeft || ship.isMovingRight || ship.isMovingUp || ship.isMovingDown) ship.moveShip();
+    requestAnimationFrame(()=>gameLoop(view, ship));
 }
 function startGame(view) {
-    gameLoop(view);
+    const ship = new (0, _ship.Ship)((0, _setup.ShipImage), (0, _setup.ShipWidth), (0, _setup.ShipHeight), (0, _setup.ShipX), (0, _setup.ShipY), (0, _setup.ShipSpeed));
+    gameLoop(view, ship);
 }
-document.addEventListener("keydown", (e)=>{
-    if (e.key === "ArrowUp") ShipObj.Y = ShipObj.Y - 5;
-    if (e.key === "ArrowDown") ShipObj.Y = ShipObj.Y + 5;
-    if (e.key === "ArrowLeft") ShipObj.X = ShipObj.X - 5;
-    if (e.key === "ArrowRight") ShipObj.X = ShipObj.X + 5;
-});
 // ArrowUp ArrowDown ArrowLeft ArrowRight
 const view = new (0, _canvasView.CanvasView)("#PlayField");
 view.initGame(startGame);
 
-},{"./view/CanvasView":"5noQJ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./images/Ship.webp":"fxpU1"}],"5noQJ":[function(require,module,exports) {
+},{"./view/CanvasView":"5noQJ","./elements/Ship":"hH6GY","./setup":"1ctuX"}],"5noQJ":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "CanvasView", ()=>CanvasView);
@@ -582,6 +565,10 @@ class CanvasView {
     initGame(startFn) {
         this.start.addEventListener("click", ()=>startFn(this));
         console.log("GameInitialized");
+    }
+    drawElement(element) {
+        if (!element) return;
+        this.context.drawImage(element.img, element.X, element.Y, element.width * 1.5, element.height * 1.5);
     }
     drawShip(img, Width, Height, X, Y) {
         this.context.imageSmoothingEnabled = false;
@@ -619,7 +606,79 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}],"fxpU1":[function(require,module,exports) {
+},{}],"hH6GY":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Ship", ()=>Ship);
+class Ship {
+    constructor(img, width, height, X, Y, speed){
+        this.img = img;
+        this.width = width;
+        this.height = height;
+        this.X = X;
+        this.Y = Y;
+        this.moveLeft = false;
+        this.moveRight = false;
+        this.moveUp = false;
+        this.moveDown = false;
+        this.speed = speed;
+        document.addEventListener("keydown", this.handleKeyDown);
+        document.addEventListener("keyup", this.handleKeyUp);
+    }
+    get isMovingUp() {
+        return this.moveUp;
+    }
+    get isMovingDown() {
+        return this.moveDown;
+    }
+    get isMovingLeft() {
+        return this.moveLeft;
+    }
+    get isMovingRight() {
+        return this.moveRight;
+    }
+    moveShip() {
+        if (this.moveUp) this.Y = this.Y - 5;
+        if (this.moveDown) this.Y = this.Y + 5;
+        if (this.moveLeft) this.X = this.X - 5;
+        if (this.moveRight) this.X = this.X + 5;
+    }
+    handleKeyUp = (e)=>{
+        if (e.code === "ArrowLeft" || e.key === "ArrowLeft") this.moveLeft = false;
+        if (e.code === "ArrowRight" || e.key === "ArrowRight") this.moveRight = false;
+        if (e.code === "ArrowUp" || e.key === "ArrowUp") this.moveUp = false;
+        if (e.code === "ArrowDown" || e.key === "ArrowDown") this.moveDown = false;
+    };
+    handleKeyDown = (e)=>{
+        if (e.code === "ArrowLeft" || e.key === "ArrowLeft") this.moveLeft = true;
+        if (e.code === "ArrowRight" || e.key === "ArrowRight") this.moveRight = true;
+        if (e.code === "ArrowUp" || e.key === "ArrowUp") this.moveUp = true;
+        if (e.code === "ArrowDown" || e.key === "ArrowDown") this.moveDown = true;
+    };
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"1ctuX":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "canvas", ()=>canvas);
+parcelHelpers.export(exports, "ShipX", ()=>ShipX);
+parcelHelpers.export(exports, "ShipY", ()=>ShipY);
+parcelHelpers.export(exports, "ShipImage", ()=>ShipImage);
+parcelHelpers.export(exports, "ShipWidth", ()=>ShipWidth);
+parcelHelpers.export(exports, "ShipHeight", ()=>ShipHeight);
+parcelHelpers.export(exports, "ShipSpeed", ()=>ShipSpeed);
+var _shipWebp = require("./images/Ship.webp");
+var _shipWebpDefault = parcelHelpers.interopDefault(_shipWebp);
+const canvas = document.querySelector("#PlayField");
+const ShipX = canvas.width / 2 - 7.5;
+const ShipY = canvas.height / 8 * 7 - 7.5;
+const ShipImage = new Image();
+ShipImage.src = (0, _shipWebpDefault.default);
+const ShipWidth = 15;
+const ShipHeight = 15;
+const ShipSpeed = 3;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./images/Ship.webp":"fxpU1"}],"fxpU1":[function(require,module,exports) {
 module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "Ship.756280cf.webp" + "?" + Date.now();
 
 },{"./helpers/bundle-url":"lgJ39"}],"lgJ39":[function(require,module,exports) {

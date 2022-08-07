@@ -1,3 +1,5 @@
+import {Ship} from "../elements/Ship";
+
 export class CanvasView {
     canvas:HTMLCanvasElement;
     context: CanvasRenderingContext2D;
@@ -16,6 +18,19 @@ export class CanvasView {
     initGame(startFn: (view: CanvasView) => void) {
         this.start.addEventListener('click', () => startFn(this))
         console.log('GameInitialized')
+    }
+
+    drawElement(element: Ship) {
+        if(!element) return;
+        this.context.drawImage(
+            element.img,
+            element.X,
+            element.Y,
+            element.width *1.5,
+            element.height *1.5
+        )
+
+
     }
 
     drawShip(img: HTMLImageElement, Width: number, Height: number, X: number, Y:number) {

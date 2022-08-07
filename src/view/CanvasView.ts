@@ -26,8 +26,8 @@ export class CanvasView {
             element.img,
             element.X,
             element.Y,
-            element.width *1.5,
-            element.height *1.5
+            element.width,
+            element.height
         )
 
 

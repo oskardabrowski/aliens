@@ -538,10 +538,12 @@ var _setup = require("./setup");
 function gameLoop(view, ship) {
     view.clear();
     view.drawElement(ship);
-    if (ship.isMovingLeft || ship.isMovingRight || ship.isMovingUp || ship.isMovingDown) ship.moveShip();
+    // Lock Canvas
+    if (ship.isMovingLeft && ship.X > (0, _setup.LeftCanvasWall) && ship.Y > (0, _setup.UpCanvasWall) && ship.Y < (0, _setup.DownCanvasWall) - ship.height - 5 || ship.isMovingRight && ship.X < (0, _setup.RightCanvasWall) - ship.width && ship.Y > (0, _setup.UpCanvasWall) && ship.Y < (0, _setup.DownCanvasWall) - ship.height - 5 || ship.isMovingUp && ship.Y > (0, _setup.UpCanvasWall) && ship.X > (0, _setup.LeftCanvasWall) && ship.X < (0, _setup.RightCanvasWall) - ship.width || ship.isMovingDown && ship.Y < (0, _setup.DownCanvasWall) - ship.height - 5 && ship.X > (0, _setup.LeftCanvasWall) && ship.X < (0, _setup.RightCanvasWall) - ship.width) ship.moveShip();
     requestAnimationFrame(()=>gameLoop(view, ship));
 }
 function startGame(view) {
+    // Create Ship
     const ship = new (0, _ship.Ship)((0, _setup.ShipImage), (0, _setup.ShipWidth), (0, _setup.ShipHeight), (0, _setup.ShipX), (0, _setup.ShipY), (0, _setup.ShipSpeed));
     gameLoop(view, ship);
 }
@@ -568,7 +570,7 @@ class CanvasView {
     }
     drawElement(element) {
         if (!element) return;
-        this.context.drawImage(element.img, element.X, element.Y, element.width * 1.5, element.height * 1.5);
+        this.context.drawImage(element.img, element.X, element.Y, element.width, element.height);
     }
     drawShip(img, Width, Height, X, Y) {
         this.context.imageSmoothingEnabled = false;
@@ -667,6 +669,10 @@ parcelHelpers.export(exports, "ShipImage", ()=>ShipImage);
 parcelHelpers.export(exports, "ShipWidth", ()=>ShipWidth);
 parcelHelpers.export(exports, "ShipHeight", ()=>ShipHeight);
 parcelHelpers.export(exports, "ShipSpeed", ()=>ShipSpeed);
+parcelHelpers.export(exports, "LeftCanvasWall", ()=>LeftCanvasWall);
+parcelHelpers.export(exports, "UpCanvasWall", ()=>UpCanvasWall);
+parcelHelpers.export(exports, "RightCanvasWall", ()=>RightCanvasWall);
+parcelHelpers.export(exports, "DownCanvasWall", ()=>DownCanvasWall);
 var _shipWebp = require("./images/Ship.webp");
 var _shipWebpDefault = parcelHelpers.interopDefault(_shipWebp);
 const canvas = document.querySelector("#PlayField");
@@ -674,9 +680,13 @@ const ShipX = canvas.width / 2 - 7.5;
 const ShipY = canvas.height / 8 * 7 - 7.5;
 const ShipImage = new Image();
 ShipImage.src = (0, _shipWebpDefault.default);
-const ShipWidth = 15;
-const ShipHeight = 15;
+const ShipWidth = 20;
+const ShipHeight = 20;
 const ShipSpeed = 3;
+const LeftCanvasWall = 0;
+const UpCanvasWall = 0;
+const RightCanvasWall = canvas.width;
+const DownCanvasWall = canvas.height;
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./images/Ship.webp":"fxpU1"}],"fxpU1":[function(require,module,exports) {
 module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "Ship.756280cf.webp" + "?" + Date.now();

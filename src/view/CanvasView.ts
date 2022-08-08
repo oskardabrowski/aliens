@@ -1,4 +1,5 @@
 import {Ship} from "../elements/Ship";
+import {Alien} from "../elements/Alien";
 
 export class CanvasView {
     canvas:HTMLCanvasElement;
@@ -20,7 +21,7 @@ export class CanvasView {
         console.log('GameInitialized')
     }
 
-    drawElement(element: Ship) {
+    drawElement(element: Ship | Alien) {
         if(!element) return;
         this.context.drawImage(
             element.img,
@@ -29,19 +30,9 @@ export class CanvasView {
             element.width,
             element.height
         )
-
-
     }
 
-    drawShip(img: HTMLImageElement, Width: number, Height: number, X: number, Y:number) {
-        this.context.imageSmoothingEnabled = false;
-        this.context.drawImage(
-            img,
-            X,
-            Y,
-            Width *1.5,
-            Height *1.5
-        )
+    drawAliens(aliens: Alien[]) {
+        aliens.forEach(alien => this.drawElement(alien))
     }
-
 }

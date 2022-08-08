@@ -535,23 +535,28 @@ function hmrAcceptRun(bundle, id) {
 var _canvasView = require("./view/CanvasView");
 var _ship = require("./elements/Ship");
 var _setup = require("./setup");
-function gameLoop(view, ship) {
+var _helpers = require("./helpers");
+function gameLoop(view, ship, aliens) {
     view.clear();
     view.drawElement(ship);
+    view.drawAliens(aliens);
     // Lock Canvas
-    if (ship.isMovingLeft && ship.X > (0, _setup.LeftCanvasWall) && ship.Y > (0, _setup.UpCanvasWall) && ship.Y < (0, _setup.DownCanvasWall) - ship.height - 5 || ship.isMovingRight && ship.X < (0, _setup.RightCanvasWall) - ship.width && ship.Y > (0, _setup.UpCanvasWall) && ship.Y < (0, _setup.DownCanvasWall) - ship.height - 5 || ship.isMovingUp && ship.Y > (0, _setup.UpCanvasWall) && ship.X > (0, _setup.LeftCanvasWall) && ship.X < (0, _setup.RightCanvasWall) - ship.width || ship.isMovingDown && ship.Y < (0, _setup.DownCanvasWall) - ship.height - 5 && ship.X > (0, _setup.LeftCanvasWall) && ship.X < (0, _setup.RightCanvasWall) - ship.width) ship.moveShip();
-    requestAnimationFrame(()=>gameLoop(view, ship));
+    if (ship.isMovingLeft && ship.X > (0, _setup.LeftCanvasWall) && ship.Y > (0, _setup.UpCanvasWall) && ship.Y < (0, _setup.DownCanvasWall) - ship.height - 5 || ship.isMovingRight && ship.X < (0, _setup.RightCanvasWall) - ship.width && ship.Y > (0, _setup.UpCanvasWall) && ship.Y < (0, _setup.DownCanvasWall) - ship.height - 5 || ship.isMovingUp && ship.Y > (0, _setup.UpCanvasWall) && ship.X > (0, _setup.LeftCanvasWall) && ship.X < (0, _setup.RightCanvasWall) - ship.width || ship.isMovingDown && ship.Y < (0, _setup.DownCanvasWall) - ship.height - 1.5 && ship.X > (0, _setup.LeftCanvasWall) && ship.X < (0, _setup.RightCanvasWall) - ship.width) ship.moveShip();
+    requestAnimationFrame(()=>gameLoop(view, ship, aliens));
 }
 function startGame(view) {
     // Create Ship
     const ship = new (0, _ship.Ship)((0, _setup.ShipImage), (0, _setup.ShipWidth), (0, _setup.ShipHeight), (0, _setup.ShipX), (0, _setup.ShipY), (0, _setup.ShipSpeed));
-    gameLoop(view, ship);
+    // Aliens
+    const aliens = (0, _helpers.createAliens)();
+    console.log(aliens);
+    gameLoop(view, ship, aliens);
 }
 // ArrowUp ArrowDown ArrowLeft ArrowRight
 const view = new (0, _canvasView.CanvasView)("#PlayField");
 view.initGame(startGame);
 
-},{"./view/CanvasView":"5noQJ","./elements/Ship":"hH6GY","./setup":"1ctuX"}],"5noQJ":[function(require,module,exports) {
+},{"./view/CanvasView":"5noQJ","./elements/Ship":"hH6GY","./setup":"1ctuX","./helpers":"adjmJ"}],"5noQJ":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "CanvasView", ()=>CanvasView);
@@ -572,9 +577,8 @@ class CanvasView {
         if (!element) return;
         this.context.drawImage(element.img, element.X, element.Y, element.width, element.height);
     }
-    drawShip(img, Width, Height, X, Y) {
-        this.context.imageSmoothingEnabled = false;
-        this.context.drawImage(img, X, Y, Width * 1.5, Height * 1.5);
+    drawAliens(aliens) {
+        aliens.forEach((alien)=>this.drawElement(alien));
     }
 }
 
@@ -669,12 +673,28 @@ parcelHelpers.export(exports, "ShipImage", ()=>ShipImage);
 parcelHelpers.export(exports, "ShipWidth", ()=>ShipWidth);
 parcelHelpers.export(exports, "ShipHeight", ()=>ShipHeight);
 parcelHelpers.export(exports, "ShipSpeed", ()=>ShipSpeed);
+parcelHelpers.export(exports, "AlienWidth", ()=>AlienWidth);
+parcelHelpers.export(exports, "AlienHeight", ()=>AlienHeight);
+parcelHelpers.export(exports, "AlienPadding", ()=>AlienPadding);
+parcelHelpers.export(exports, "RedAlienImage", ()=>RedAlienImage);
+parcelHelpers.export(exports, "BlueAlienImage", ()=>BlueAlienImage);
+parcelHelpers.export(exports, "GreenAlienImage", ()=>GreenAlienImage);
+parcelHelpers.export(exports, "PurpleAlienImage", ()=>PurpleAlienImage);
 parcelHelpers.export(exports, "LeftCanvasWall", ()=>LeftCanvasWall);
 parcelHelpers.export(exports, "UpCanvasWall", ()=>UpCanvasWall);
 parcelHelpers.export(exports, "RightCanvasWall", ()=>RightCanvasWall);
 parcelHelpers.export(exports, "DownCanvasWall", ()=>DownCanvasWall);
+parcelHelpers.export(exports, "LEVEL", ()=>LEVEL);
 var _shipWebp = require("./images/Ship.webp");
 var _shipWebpDefault = parcelHelpers.interopDefault(_shipWebp);
+var _redAilenPng = require("./images/RedAilen.png");
+var _redAilenPngDefault = parcelHelpers.interopDefault(_redAilenPng);
+var _blueAilenPng = require("./images/BlueAilen.png");
+var _blueAilenPngDefault = parcelHelpers.interopDefault(_blueAilenPng);
+var _greenAilenPng = require("./images/GreenAilen.png");
+var _greenAilenPngDefault = parcelHelpers.interopDefault(_greenAilenPng);
+var _purpleAlienPng = require("./images/PurpleAlien.png");
+var _purpleAlienPngDefault = parcelHelpers.interopDefault(_purpleAlienPng);
 const canvas = document.querySelector("#PlayField");
 const ShipX = canvas.width / 2 - 7.5;
 const ShipY = canvas.height / 8 * 7 - 7.5;
@@ -683,12 +703,85 @@ ShipImage.src = (0, _shipWebpDefault.default);
 const ShipWidth = 20;
 const ShipHeight = 20;
 const ShipSpeed = 3;
+const AlienWidth = 20;
+const AlienHeight = 20;
+const AlienPadding = 5;
+const RedAlienImage = new Image();
+RedAlienImage.src = (0, _redAilenPngDefault.default);
+const BlueAlienImage = new Image();
+BlueAlienImage.src = (0, _blueAilenPngDefault.default);
+const GreenAlienImage = new Image();
+GreenAlienImage.src = (0, _greenAilenPngDefault.default);
+const PurpleAlienImage = new Image();
+PurpleAlienImage.src = (0, _purpleAlienPngDefault.default);
 const LeftCanvasWall = 0;
 const UpCanvasWall = 0;
 const RightCanvasWall = canvas.width;
 const DownCanvasWall = canvas.height;
+const LEVEL = [
+    0,
+    0,
+    3,
+    3,
+    4,
+    4,
+    3,
+    3,
+    0,
+    0,
+    0,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, 
+];
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./images/Ship.webp":"fxpU1"}],"fxpU1":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./images/Ship.webp":"fxpU1","./images/RedAilen.png":"7RVgT","./images/BlueAilen.png":"56Z1O","./images/GreenAilen.png":"i78zC","./images/PurpleAlien.png":"l1jQV"}],"fxpU1":[function(require,module,exports) {
 module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "Ship.756280cf.webp" + "?" + Date.now();
 
 },{"./helpers/bundle-url":"lgJ39"}],"lgJ39":[function(require,module,exports) {
@@ -725,6 +818,59 @@ exports.getBundleURL = getBundleURLCached;
 exports.getBaseURL = getBaseURL;
 exports.getOrigin = getOrigin;
 
-},{}]},["iJYvl","h7u1C"], "h7u1C", "parcelRequireaf0b")
+},{}],"7RVgT":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "RedAilen.7cc0cc11.png" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"lgJ39"}],"56Z1O":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "BlueAilen.383663b7.png" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"lgJ39"}],"i78zC":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "GreenAilen.e12712d1.png" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"lgJ39"}],"l1jQV":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "PurpleAlien.825b93f1.png" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"lgJ39"}],"adjmJ":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "createAliens", ()=>createAliens);
+var _alien = require("./elements/Alien");
+var _setup = require("./setup");
+function createAliens() {
+    return (0, _setup.LEVEL).reduce((actual, element, i)=>{
+        let row = Math.floor((i + 1) / 10);
+        const col = i % 10;
+        let image;
+        if (col === 9) row--;
+        const X = 25 + col * ((0, _setup.AlienWidth) + (0, _setup.AlienPadding));
+        const Y = 5 + row * ((0, _setup.AlienHeight) + (0, _setup.AlienPadding));
+        if (element === 0) return actual;
+        if (element === 1) image = (0, _setup.RedAlienImage);
+        if (element === 2) image = (0, _setup.BlueAlienImage);
+        if (element === 3) image = (0, _setup.GreenAlienImage);
+        if (element === 4) image = (0, _setup.PurpleAlienImage);
+        return [
+            ...actual,
+            new (0, _alien.Alien)(image, (0, _setup.AlienWidth), (0, _setup.AlienHeight), X, Y, element)
+        ];
+    }, []);
+}
+
+},{"./elements/Alien":"245Jy","./setup":"1ctuX","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"245Jy":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Alien", ()=>Alien);
+class Alien {
+    constructor(img, width, height, X, Y, energy){
+        this.img = img;
+        this.width = width;
+        this.height = height;
+        this.X = X;
+        this.Y = Y;
+        this.energy = energy;
+    }
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["iJYvl","h7u1C"], "h7u1C", "parcelRequireaf0b")
 
 //# sourceMappingURL=index.b71e74eb.js.map

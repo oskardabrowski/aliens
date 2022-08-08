@@ -1,5 +1,6 @@
 import {Ship} from "../elements/Ship";
 import {Alien} from "../elements/Alien";
+import {Shoot} from "../elements/Shoot";
 
 export class CanvasView {
     canvas:HTMLCanvasElement;
@@ -21,7 +22,7 @@ export class CanvasView {
         console.log('GameInitialized')
     }
 
-    drawElement(element: Ship | Alien) {
+    drawElement(element: Ship | Alien | Shoot) {
         if(!element) return;
         this.context.drawImage(
             element.img,
@@ -34,5 +35,9 @@ export class CanvasView {
 
     drawAliens(aliens: Alien[]) {
         aliens.forEach(alien => this.drawElement(alien))
+    }
+
+    drawShoots(shoots:Shoot[]) {
+        shoots.forEach(shoot => this.drawElement(shoot))
     }
 }

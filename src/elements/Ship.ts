@@ -11,6 +11,8 @@ export class Ship {
     private moveRight: boolean;
     private moveUp: boolean;
     private moveDown: boolean;
+    private ShipShooting: boolean;
+    private WasShoot:boolean;
 
     constructor(img:HTMLImageElement, width:number, height:number, X:number, Y:number, speed:number) {
         this.img = img;
@@ -18,10 +20,12 @@ export class Ship {
         this.height = height;
         this.X = X;
         this.Y = Y;
-        this.moveLeft = false
-        this.moveRight = false
-        this.moveUp = false
-        this.moveDown = false
+        this.moveLeft = false;
+        this.moveRight = false;
+        this.moveUp = false;
+        this.moveDown = false;
+        this.ShipShooting = false;
+        this.WasShoot = false;
         this.speed = speed;
         document.addEventListener('keydown', this.handleKeyDown);
         document.addEventListener('keyup', this.handleKeyUp);
@@ -43,6 +47,23 @@ export class Ship {
         return this.moveRight;
     }
 
+    get isShooting():boolean {
+        return this.ShipShooting;
+    }
+
+    get shipCoords():number[] {
+        return [this.X, this.Y];
+    }
+
+    get ItWasShoot() {
+        return this.WasShoot;
+    }
+
+    set setShooting(shooting:boolean) {
+        this.ShipShooting = shooting;
+        this.WasShoot = !shooting;
+    }
+
     moveShip():void {
         if(this.moveUp) this.Y = this.Y - 5;
         if(this.moveDown) this.Y = this.Y + 5;
@@ -54,6 +75,7 @@ export class Ship {
         if(e.code === "ArrowRight" || e.key === "ArrowRight") this.moveRight = false;
         if(e.code === "ArrowUp" || e.key === "ArrowUp") this.moveUp = false;
         if(e.code === "ArrowDown" || e.key === "ArrowDown") this.moveDown = false;
+        if(e.code === "Space" || e.key === "Space" && this.WasShoot === true) this.WasShoot = false;
     }
 
     handleKeyDown = (e: KeyboardEvent): void => {
@@ -61,5 +83,6 @@ export class Ship {
         if(e.code === "ArrowRight" || e.key === "ArrowRight") this.moveRight = true;
         if(e.code === "ArrowUp" || e.key === "ArrowUp") this.moveUp = true;
         if(e.code === "ArrowDown" || e.key === "ArrowDown") this.moveDown = true;
+        if(e.code === "Space" || e.key === "Space" && !this.WasShoot) this.ShipShooting = true;
     }
 }

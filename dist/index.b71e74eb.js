@@ -534,29 +534,46 @@ function hmrAcceptRun(bundle, id) {
 },{}],"h7u1C":[function(require,module,exports) {
 var _canvasView = require("./view/CanvasView");
 var _ship = require("./elements/Ship");
+var _shoot = require("./elements/Shoot");
 var _setup = require("./setup");
 var _helpers = require("./helpers");
-function gameLoop(view, ship, aliens) {
+function gameLoop(view, ship, aliens, shoots) {
     view.clear();
     view.drawElement(ship);
     view.drawAliens(aliens);
+    view.drawShoots(shoots);
     // Lock Canvas
     if (ship.isMovingLeft && ship.X > (0, _setup.LeftCanvasWall) && ship.Y > (0, _setup.UpCanvasWall) && ship.Y < (0, _setup.DownCanvasWall) - ship.height - 5 || ship.isMovingRight && ship.X < (0, _setup.RightCanvasWall) - ship.width && ship.Y > (0, _setup.UpCanvasWall) && ship.Y < (0, _setup.DownCanvasWall) - ship.height - 5 || ship.isMovingUp && ship.Y > (0, _setup.UpCanvasWall) && ship.X > (0, _setup.LeftCanvasWall) && ship.X < (0, _setup.RightCanvasWall) - ship.width || ship.isMovingDown && ship.Y < (0, _setup.DownCanvasWall) - ship.height - 1.5 && ship.X > (0, _setup.LeftCanvasWall) && ship.X < (0, _setup.RightCanvasWall) - ship.width) ship.moveShip();
-    requestAnimationFrame(()=>gameLoop(view, ship, aliens));
+    // Detect shoot outside canvas
+    shoots.forEach((el)=>{
+        if (el.Y < 0) shoots = shoots.filter((shoot)=>shoot != el);
+        el.shootUp();
+    });
+    // Create shoot, lock shoot series
+    if (ship.isShooting) {
+        const coords = ship.shipCoords;
+        const X = coords[0] + ship.width / 2 - 2.5;
+        const Y = coords[1] - 5;
+        const shoot = new (0, _shoot.Shoot)((0, _setup.ShootImage), 5, 5, X, Y, 3);
+        if (ship.ItWasShoot === false) shoots.push(shoot);
+        ship.setShooting = false;
+    }
+    requestAnimationFrame(()=>gameLoop(view, ship, aliens, shoots));
 }
 function startGame(view) {
     // Create Ship
     const ship = new (0, _ship.Ship)((0, _setup.ShipImage), (0, _setup.ShipWidth), (0, _setup.ShipHeight), (0, _setup.ShipX), (0, _setup.ShipY), (0, _setup.ShipSpeed));
     // Aliens
     const aliens = (0, _helpers.createAliens)();
-    console.log(aliens);
-    gameLoop(view, ship, aliens);
+    // Shoot List
+    let shoots = [];
+    gameLoop(view, ship, aliens, shoots);
 }
 // ArrowUp ArrowDown ArrowLeft ArrowRight
 const view = new (0, _canvasView.CanvasView)("#PlayField");
 view.initGame(startGame);
 
-},{"./view/CanvasView":"5noQJ","./elements/Ship":"hH6GY","./setup":"1ctuX","./helpers":"adjmJ"}],"5noQJ":[function(require,module,exports) {
+},{"./view/CanvasView":"5noQJ","./elements/Ship":"hH6GY","./setup":"1ctuX","./helpers":"adjmJ","./elements/Shoot":"Qgxk9"}],"5noQJ":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "CanvasView", ()=>CanvasView);
@@ -579,6 +596,9 @@ class CanvasView {
     }
     drawAliens(aliens) {
         aliens.forEach((alien)=>this.drawElement(alien));
+    }
+    drawShoots(shoots) {
+        shoots.forEach((shoot)=>this.drawElement(shoot));
     }
 }
 
@@ -627,6 +647,8 @@ class Ship {
         this.moveRight = false;
         this.moveUp = false;
         this.moveDown = false;
+        this.ShipShooting = false;
+        this.WasShoot = false;
         this.speed = speed;
         document.addEventListener("keydown", this.handleKeyDown);
         document.addEventListener("keyup", this.handleKeyUp);
@@ -643,6 +665,22 @@ class Ship {
     get isMovingRight() {
         return this.moveRight;
     }
+    get isShooting() {
+        return this.ShipShooting;
+    }
+    get shipCoords() {
+        return [
+            this.X,
+            this.Y
+        ];
+    }
+    get ItWasShoot() {
+        return this.WasShoot;
+    }
+    set setShooting(shooting) {
+        this.ShipShooting = shooting;
+        this.WasShoot = !shooting;
+    }
     moveShip() {
         if (this.moveUp) this.Y = this.Y - 5;
         if (this.moveDown) this.Y = this.Y + 5;
@@ -654,12 +692,14 @@ class Ship {
         if (e.code === "ArrowRight" || e.key === "ArrowRight") this.moveRight = false;
         if (e.code === "ArrowUp" || e.key === "ArrowUp") this.moveUp = false;
         if (e.code === "ArrowDown" || e.key === "ArrowDown") this.moveDown = false;
+        if (e.code === "Space" || e.key === "Space" && this.WasShoot === true) this.WasShoot = false;
     };
     handleKeyDown = (e)=>{
         if (e.code === "ArrowLeft" || e.key === "ArrowLeft") this.moveLeft = true;
         if (e.code === "ArrowRight" || e.key === "ArrowRight") this.moveRight = true;
         if (e.code === "ArrowUp" || e.key === "ArrowUp") this.moveUp = true;
         if (e.code === "ArrowDown" || e.key === "ArrowDown") this.moveDown = true;
+        if (e.code === "Space" || e.key === "Space" && !this.WasShoot) this.ShipShooting = true;
     };
 }
 
@@ -680,6 +720,7 @@ parcelHelpers.export(exports, "RedAlienImage", ()=>RedAlienImage);
 parcelHelpers.export(exports, "BlueAlienImage", ()=>BlueAlienImage);
 parcelHelpers.export(exports, "GreenAlienImage", ()=>GreenAlienImage);
 parcelHelpers.export(exports, "PurpleAlienImage", ()=>PurpleAlienImage);
+parcelHelpers.export(exports, "ShootImage", ()=>ShootImage);
 parcelHelpers.export(exports, "LeftCanvasWall", ()=>LeftCanvasWall);
 parcelHelpers.export(exports, "UpCanvasWall", ()=>UpCanvasWall);
 parcelHelpers.export(exports, "RightCanvasWall", ()=>RightCanvasWall);
@@ -695,9 +736,11 @@ var _greenAilenPng = require("./images/GreenAilen.png");
 var _greenAilenPngDefault = parcelHelpers.interopDefault(_greenAilenPng);
 var _purpleAlienPng = require("./images/PurpleAlien.png");
 var _purpleAlienPngDefault = parcelHelpers.interopDefault(_purpleAlienPng);
+var _shootPng = require("./images/Shoot.png");
+var _shootPngDefault = parcelHelpers.interopDefault(_shootPng);
 const canvas = document.querySelector("#PlayField");
-const ShipX = canvas.width / 2 - 7.5;
-const ShipY = canvas.height / 8 * 7 - 7.5;
+const ShipX = Math.floor(canvas.width / 2 - 7.5);
+const ShipY = Math.floor(canvas.height / 8 * 7 - 7.5);
 const ShipImage = new Image();
 ShipImage.src = (0, _shipWebpDefault.default);
 const ShipWidth = 20;
@@ -714,6 +757,8 @@ const GreenAlienImage = new Image();
 GreenAlienImage.src = (0, _greenAilenPngDefault.default);
 const PurpleAlienImage = new Image();
 PurpleAlienImage.src = (0, _purpleAlienPngDefault.default);
+const ShootImage = new Image();
+ShootImage.src = (0, _shootPngDefault.default);
 const LeftCanvasWall = 0;
 const UpCanvasWall = 0;
 const RightCanvasWall = canvas.width;
@@ -781,7 +826,7 @@ const LEVEL = [
     0, 
 ];
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./images/Ship.webp":"fxpU1","./images/RedAilen.png":"7RVgT","./images/BlueAilen.png":"56Z1O","./images/GreenAilen.png":"i78zC","./images/PurpleAlien.png":"l1jQV"}],"fxpU1":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./images/Ship.webp":"fxpU1","./images/RedAilen.png":"7RVgT","./images/BlueAilen.png":"56Z1O","./images/GreenAilen.png":"i78zC","./images/PurpleAlien.png":"l1jQV","./images/Shoot.png":"fBQWc"}],"fxpU1":[function(require,module,exports) {
 module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "Ship.756280cf.webp" + "?" + Date.now();
 
 },{"./helpers/bundle-url":"lgJ39"}],"lgJ39":[function(require,module,exports) {
@@ -830,6 +875,9 @@ module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "GreenA
 },{"./helpers/bundle-url":"lgJ39"}],"l1jQV":[function(require,module,exports) {
 module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "PurpleAlien.825b93f1.png" + "?" + Date.now();
 
+},{"./helpers/bundle-url":"lgJ39"}],"fBQWc":[function(require,module,exports) {
+module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "Shoot.01c7417c.png" + "?" + Date.now();
+
 },{"./helpers/bundle-url":"lgJ39"}],"adjmJ":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
@@ -842,7 +890,7 @@ function createAliens() {
         const col = i % 10;
         let image;
         if (col === 9) row--;
-        const X = 25 + col * ((0, _setup.AlienWidth) + (0, _setup.AlienPadding));
+        const X = 30 + col * ((0, _setup.AlienWidth) + (0, _setup.AlienPadding));
         const Y = 5 + row * ((0, _setup.AlienHeight) + (0, _setup.AlienPadding));
         if (element === 0) return actual;
         if (element === 1) image = (0, _setup.RedAlienImage);
@@ -868,6 +916,24 @@ class Alien {
         this.X = X;
         this.Y = Y;
         this.energy = energy;
+    }
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"Qgxk9":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Shoot", ()=>Shoot);
+class Shoot {
+    constructor(img, width, height, X, Y, speed){
+        this.img = img;
+        this.width = width;
+        this.height = height;
+        this.X = X;
+        this.Y = Y;
+        this.speed = speed;
+    }
+    shootUp() {
+        this.Y = this.Y - this.speed;
     }
 }
 

@@ -3,10 +3,11 @@ import RED_ALIEN from './images/RedAilen.png';
 import BLUE_ALIEN from './images/BlueAilen.png';
 import GREEN_ALIEN from './images/GreenAilen.png';
 import PURPLE_ALIEN from './images/PurpleAlien.png';
+import SHOOT_IMAGE from './images/Shoot.png';
 
 export const canvas:HTMLCanvasElement = document.querySelector('#PlayField');
-export const ShipX:number = (canvas.width /2) - (15/2);
-export const ShipY:number = ((canvas.height /8)*7) - (15/2);
+export const ShipX:number = Math.floor((canvas.width /2) - (15/2));
+export const ShipY:number = Math.floor(((canvas.height /8)*7) - (15/2));
 export const ShipImage = new Image();
 ShipImage.src = SHIP_URL;
 export const ShipWidth = 20;
@@ -28,6 +29,9 @@ GreenAlienImage.src = GREEN_ALIEN;
 
 export const PurpleAlienImage = new Image();
 PurpleAlienImage.src = PURPLE_ALIEN;
+
+export const ShootImage = new Image();
+ShootImage.src = SHOOT_IMAGE;
 
 export const LeftCanvasWall:number = 0;
 export const UpCanvasWall:number = 0;

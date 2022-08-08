@@ -11,7 +11,7 @@ export function createAliens():Alien[] {
 
         if(col === 9) row--
 
-        const X = 25 + col * (AlienWidth + AlienPadding);
+        const X = 30 + col * (AlienWidth + AlienPadding);
         const Y = 5 + row * (AlienHeight + AlienPadding);
 
         if(element === 0) return actual;

@@ -5,7 +5,10 @@ import {Shoot} from "./elements/Shoot";
 import {Hit} from "./Hit";
 import {ShipX, ShipY, ShipImage, ShipWidth, ShipHeight, ShipSpeed,
 LeftCanvasWall, RightCanvasWall, UpCanvasWall, DownCanvasWall, ShootImage} from "./setup";
-import {createAliens} from './helpers';
+import {createAliens, moveAllAliens, clearAliensInterval, checkAlienReachedDown} from './helpers';
+
+let gameTime:number = 1;
+let gameInterval:ReturnType<typeof setInterval>;
 
 function gameLoop(view: CanvasView, ship: Ship, aliens:Alien[], shoots:Shoot[], hit:Hit):void {
     view.clear();
@@ -27,6 +30,8 @@ function gameLoop(view: CanvasView, ship: Ship, aliens:Alien[], shoots:Shoot[], 
     shoots = hit.isShootIsOutside(shoots);
 
     hit.isAlienHit(aliens, shoots);
+    const shipDestroyed:boolean = hit.isShipCollidingWithAlien(aliens, ship);
+    const alienReachedDown:boolean = checkAlienReachedDown(aliens, DownCanvasWall);
 
     // Create shoot, lock shoot series
     if(ship.isShooting) {
@@ -38,7 +43,27 @@ function gameLoop(view: CanvasView, ship: Ship, aliens:Alien[], shoots:Shoot[], 
         ship.setShooting = false;
     }
 
-    requestAnimationFrame(() => gameLoop(view, ship, aliens, shoots, hit))
+
+
+    if(gameTime % 5 === 0) moveAllAliens(aliens);
+    if(gameTime % 5 === 1) clearAliensInterval(aliens);
+
+    if(shipDestroyed) {
+        clearInterval(gameInterval);
+        view.shipDestroyed();
+    }
+    if(alienReachedDown) {
+        clearInterval(gameInterval);
+        view.alienReachedTheGoal();
+    }
+
+    if(aliens.length === 0) {
+        clearInterval(gameInterval);
+        view.wonTheGame();
+    }
+
+    if(!shipDestroyed && !alienReachedDown && aliens.length > 0) requestAnimationFrame(() => gameLoop(view, ship, aliens, shoots, hit));
+
 }
 
 function startGame(view: CanvasView):void {
@@ -49,9 +74,15 @@ function startGame(view: CanvasView):void {
     let aliens = createAliens();
     // Shoot List
     let shoots:Shoot[] = [];
-
     //Hit
     const hit = new Hit();
+
+    setTimeout(() => {
+        clearInterval(gameInterval);
+        gameInterval = setInterval(() => {
+            gameTime += 1;
+        }, 1000);
+    }, 1000)
 
     gameLoop(view, ship, aliens, shoots, hit);
 }

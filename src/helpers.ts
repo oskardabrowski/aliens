@@ -34,3 +34,22 @@ export function createAliens():Alien[] {
     }, [] as Alien[])
 }
 
+export function moveAllAliens(aliens: Alien[]) {
+    aliens.forEach((alien) => {
+        alien.moveAlienDown();
+    })
+}
+
+export function clearAliensInterval(aliens: Alien[]) {
+    aliens.forEach((alien) => {
+        alien.clearAlienMovement();
+    })
+}
+
+export function checkAlienReachedDown(aliens: Alien[], downWall: number):boolean {
+    let status:boolean = false;
+    aliens.forEach(alien => {
+        if(alien.isAlienReachedDown(downWall)) status = true;
+    })
+    return status;
+}

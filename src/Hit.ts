@@ -1,18 +1,29 @@
 import {Shoot} from "./elements/Shoot";
 import {Alien} from "./elements/Alien";
+import {Ship} from "./elements/Ship";
 
 export class Hit {
 
-    isCollidingAlien(alien: Alien, shoot:Shoot) {
+    isCollidingAlien(alien: Alien, el:Shoot | Ship) {
         if(
-            shoot.X < alien.X + alien.width &&
-            shoot.X + shoot.width > alien.X &&
-            shoot.Y < alien.Y + alien.height &&
-            shoot.Y + shoot.height > alien.Y
+            el.X < alien.X + alien.width &&
+            el.X + el.width > alien.X &&
+            el.Y < alien.Y + alien.height &&
+            el.Y + el.height > alien.Y
         ) {
             return true;
         }
         return false;
+    }
+
+    isShipCollidingWithAlien(aliens: Alien[], ship:Ship):boolean {
+        let status:boolean = false;
+        aliens.forEach((alien,i) => {
+            if(this.isCollidingAlien(alien, ship)) {
+                status = true;
+            }
+        });
+        return status;
     }
 
     isAlienHit(aliens: Alien[], shoots: Shoot[]) {
@@ -28,8 +39,6 @@ export class Hit {
                         alien.SetAlienEnergy = alien.GetAlienEnergy - 1;
                         shoots.splice(ShootIndex, 1);
                     }
-
-
                 }
             })
         })

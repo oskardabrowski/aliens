@@ -538,6 +538,8 @@ var _shoot = require("./elements/Shoot");
 var _hit = require("./Hit");
 var _setup = require("./setup");
 var _helpers = require("./helpers");
+let gameTime = 1;
+let gameInterval;
 function gameLoop(view, ship, aliens, shoots, hit) {
     view.clear();
     view.drawElement(ship);
@@ -548,6 +550,8 @@ function gameLoop(view, ship, aliens, shoots, hit) {
     // Detect Shoot is outside canvas
     shoots = hit.isShootIsOutside(shoots);
     hit.isAlienHit(aliens, shoots);
+    const shipDestroyed = hit.isShipCollidingWithAlien(aliens, ship);
+    const alienReachedDown = (0, _helpers.checkAlienReachedDown)(aliens, (0, _setup.DownCanvasWall));
     // Create shoot, lock shoot series
     if (ship.isShooting) {
         const coords = ship.shipCoords;
@@ -557,7 +561,21 @@ function gameLoop(view, ship, aliens, shoots, hit) {
         if (ship.ItWasShoot === false) shoots.push(shoot);
         ship.setShooting = false;
     }
-    requestAnimationFrame(()=>gameLoop(view, ship, aliens, shoots, hit));
+    if (gameTime % 5 === 0) (0, _helpers.moveAllAliens)(aliens);
+    if (gameTime % 5 === 1) (0, _helpers.clearAliensInterval)(aliens);
+    if (shipDestroyed) {
+        clearInterval(gameInterval);
+        view.shipDestroyed();
+    }
+    if (alienReachedDown) {
+        clearInterval(gameInterval);
+        view.alienReachedTheGoal();
+    }
+    if (aliens.length === 0) {
+        clearInterval(gameInterval);
+        view.wonTheGame();
+    }
+    if (!shipDestroyed && !alienReachedDown && aliens.length > 0) requestAnimationFrame(()=>gameLoop(view, ship, aliens, shoots, hit));
 }
 function startGame(view) {
     // Create Ship
@@ -568,6 +586,12 @@ function startGame(view) {
     let shoots = [];
     //Hit
     const hit = new (0, _hit.Hit)();
+    setTimeout(()=>{
+        clearInterval(gameInterval);
+        gameInterval = setInterval(()=>{
+            gameTime += 1;
+        }, 1000);
+    }, 1000);
     gameLoop(view, ship, aliens, shoots, hit);
 }
 // ArrowUp ArrowDown ArrowLeft ArrowRight
@@ -583,12 +607,23 @@ class CanvasView {
         this.canvas = document.querySelector(canvasName);
         this.context = this.canvas.getContext("2d");
         this.start = document.querySelector("#start");
+        this.info = document.querySelector("#info");
     }
     clear() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
     initGame(startFn) {
         this.start.addEventListener("click", ()=>startFn(this));
+        this.info.textContent = "Game started!";
+    }
+    shipDestroyed() {
+        this.info.textContent = "Game over! Your ship was destroyed!";
+    }
+    alienReachedTheGoal() {
+        this.info.textContent = "Game over! Alien reached the goal!";
+    }
+    wonTheGame() {
+        this.info.textContent = "You won the game!";
     }
     drawElement(element) {
         if (!element) return;
@@ -882,6 +917,9 @@ module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "Shoot.
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "createAliens", ()=>createAliens);
+parcelHelpers.export(exports, "moveAllAliens", ()=>moveAllAliens);
+parcelHelpers.export(exports, "clearAliensInterval", ()=>clearAliensInterval);
+parcelHelpers.export(exports, "checkAlienReachedDown", ()=>checkAlienReachedDown);
 var _alien = require("./elements/Alien");
 var _setup = require("./setup");
 function createAliens() {
@@ -903,12 +941,30 @@ function createAliens() {
         ];
     }, []);
 }
+function moveAllAliens(aliens) {
+    aliens.forEach((alien)=>{
+        alien.moveAlienDown();
+    });
+}
+function clearAliensInterval(aliens) {
+    aliens.forEach((alien)=>{
+        alien.clearAlienMovement();
+    });
+}
+function checkAlienReachedDown(aliens, downWall) {
+    let status = false;
+    aliens.forEach((alien)=>{
+        if (alien.isAlienReachedDown(downWall)) status = true;
+    });
+    return status;
+}
 
 },{"./elements/Alien":"245Jy","./setup":"1ctuX","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"245Jy":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Alien", ()=>Alien);
 class Alien {
+    // private alienMoved:boolean;
     constructor(img, width, height, X, Y, energy){
         this.img = img;
         this.width = width;
@@ -916,6 +972,21 @@ class Alien {
         this.X = X;
         this.Y = Y;
         this.energy = energy;
+        this.moveAlien = false;
+    // this.alienMoved = false;
+    }
+    moveAlienDown() {
+        if (this.moveAlien === false) {
+            this.Y = this.Y + 5;
+            this.moveAlien = true;
+        }
+    }
+    isAlienReachedDown(downWall) {
+        if (this.Y + this.width > downWall) return true;
+        return false;
+    }
+    clearAlienMovement() {
+        this.moveAlien = false;
     }
     get GetAlienEnergy() {
         return this.energy;
@@ -948,9 +1019,16 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Hit", ()=>Hit);
 class Hit {
-    isCollidingAlien(alien, shoot) {
-        if (shoot.X < alien.X + alien.width && shoot.X + shoot.width > alien.X && shoot.Y < alien.Y + alien.height && shoot.Y + shoot.height > alien.Y) return true;
+    isCollidingAlien(alien, el) {
+        if (el.X < alien.X + alien.width && el.X + el.width > alien.X && el.Y < alien.Y + alien.height && el.Y + el.height > alien.Y) return true;
         return false;
+    }
+    isShipCollidingWithAlien(aliens, ship) {
+        let status = false;
+        aliens.forEach((alien, i)=>{
+            if (this.isCollidingAlien(alien, ship)) status = true;
+        });
+        return status;
     }
     isAlienHit(aliens, shoots) {
         aliens.forEach((alien, index)=>{

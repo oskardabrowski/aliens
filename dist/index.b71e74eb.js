@@ -535,20 +535,19 @@ function hmrAcceptRun(bundle, id) {
 var _canvasView = require("./view/CanvasView");
 var _ship = require("./elements/Ship");
 var _shoot = require("./elements/Shoot");
+var _hit = require("./Hit");
 var _setup = require("./setup");
 var _helpers = require("./helpers");
-function gameLoop(view, ship, aliens, shoots) {
+function gameLoop(view, ship, aliens, shoots, hit) {
     view.clear();
     view.drawElement(ship);
     view.drawAliens(aliens);
     view.drawShoots(shoots);
     // Lock Canvas
     if (ship.isMovingLeft && ship.X > (0, _setup.LeftCanvasWall) && ship.Y > (0, _setup.UpCanvasWall) && ship.Y < (0, _setup.DownCanvasWall) - ship.height - 5 || ship.isMovingRight && ship.X < (0, _setup.RightCanvasWall) - ship.width && ship.Y > (0, _setup.UpCanvasWall) && ship.Y < (0, _setup.DownCanvasWall) - ship.height - 5 || ship.isMovingUp && ship.Y > (0, _setup.UpCanvasWall) && ship.X > (0, _setup.LeftCanvasWall) && ship.X < (0, _setup.RightCanvasWall) - ship.width || ship.isMovingDown && ship.Y < (0, _setup.DownCanvasWall) - ship.height - 1.5 && ship.X > (0, _setup.LeftCanvasWall) && ship.X < (0, _setup.RightCanvasWall) - ship.width) ship.moveShip();
-    // Detect shoot outside canvas
-    shoots.forEach((el)=>{
-        if (el.Y < 0) shoots = shoots.filter((shoot)=>shoot != el);
-        el.shootUp();
-    });
+    // Detect Shoot is outside canvas
+    shoots = hit.isShootIsOutside(shoots);
+    hit.isAlienHit(aliens, shoots);
     // Create shoot, lock shoot series
     if (ship.isShooting) {
         const coords = ship.shipCoords;
@@ -558,22 +557,24 @@ function gameLoop(view, ship, aliens, shoots) {
         if (ship.ItWasShoot === false) shoots.push(shoot);
         ship.setShooting = false;
     }
-    requestAnimationFrame(()=>gameLoop(view, ship, aliens, shoots));
+    requestAnimationFrame(()=>gameLoop(view, ship, aliens, shoots, hit));
 }
 function startGame(view) {
     // Create Ship
     const ship = new (0, _ship.Ship)((0, _setup.ShipImage), (0, _setup.ShipWidth), (0, _setup.ShipHeight), (0, _setup.ShipX), (0, _setup.ShipY), (0, _setup.ShipSpeed));
     // Aliens
-    const aliens = (0, _helpers.createAliens)();
+    let aliens = (0, _helpers.createAliens)();
     // Shoot List
     let shoots = [];
-    gameLoop(view, ship, aliens, shoots);
+    //Hit
+    const hit = new (0, _hit.Hit)();
+    gameLoop(view, ship, aliens, shoots, hit);
 }
 // ArrowUp ArrowDown ArrowLeft ArrowRight
 const view = new (0, _canvasView.CanvasView)("#PlayField");
 view.initGame(startGame);
 
-},{"./view/CanvasView":"5noQJ","./elements/Ship":"hH6GY","./setup":"1ctuX","./helpers":"adjmJ","./elements/Shoot":"Qgxk9"}],"5noQJ":[function(require,module,exports) {
+},{"./view/CanvasView":"5noQJ","./elements/Ship":"hH6GY","./setup":"1ctuX","./helpers":"adjmJ","./elements/Shoot":"Qgxk9","./Hit":"hCsFS"}],"5noQJ":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "CanvasView", ()=>CanvasView);
@@ -588,7 +589,6 @@ class CanvasView {
     }
     initGame(startFn) {
         this.start.addEventListener("click", ()=>startFn(this));
-        console.log("GameInitialized");
     }
     drawElement(element) {
         if (!element) return;
@@ -917,6 +917,12 @@ class Alien {
         this.Y = Y;
         this.energy = energy;
     }
+    get GetAlienEnergy() {
+        return this.energy;
+    }
+    set SetAlienEnergy(current) {
+        this.energy = current;
+    }
 }
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"Qgxk9":[function(require,module,exports) {
@@ -934,6 +940,41 @@ class Shoot {
     }
     shootUp() {
         this.Y = this.Y - this.speed;
+    }
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hCsFS":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Hit", ()=>Hit);
+class Hit {
+    isCollidingAlien(alien, shoot) {
+        if (shoot.X < alien.X + alien.width && shoot.X + shoot.width > alien.X && shoot.Y < alien.Y + alien.height && shoot.Y + shoot.height > alien.Y) return true;
+        return false;
+    }
+    isAlienHit(aliens, shoots) {
+        aliens.forEach((alien, index)=>{
+            const AlienIndex = index;
+            shoots.forEach((shoot, index)=>{
+                const ShootIndex = index;
+                if (this.isCollidingAlien(alien, shoot)) {
+                    if (alien.GetAlienEnergy === 1) {
+                        aliens.splice(AlienIndex, 1);
+                        shoots.splice(ShootIndex, 1);
+                    } else if (alien.GetAlienEnergy > 1) {
+                        alien.SetAlienEnergy = alien.GetAlienEnergy - 1;
+                        shoots.splice(ShootIndex, 1);
+                    }
+                }
+            });
+        });
+    }
+    isShootIsOutside(shoots) {
+        shoots.forEach((el)=>{
+            if (el.Y < 0) shoots = shoots.filter((shoot)=>shoot != el);
+            el.shootUp();
+        });
+        return shoots;
     }
 }
 

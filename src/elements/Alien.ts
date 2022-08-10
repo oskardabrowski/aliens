@@ -14,4 +14,12 @@ export class Alien {
         this.Y = Y;
         this.energy = energy;
     }
+
+    get GetAlienEnergy():number {
+        return this.energy
+    }
+
+    set SetAlienEnergy(current:number) {
+        this.energy = current;
+    }
 }

@@ -19,7 +19,6 @@ export class CanvasView {
 
     initGame(startFn: (view: CanvasView) => void) {
         this.start.addEventListener('click', () => startFn(this))
-        console.log('GameInitialized')
     }
 
     drawElement(element: Ship | Alien | Shoot) {
